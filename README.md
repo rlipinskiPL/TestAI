@@ -14,7 +14,6 @@ Currently available are only MLP's with basic functionalities.
 - and more useful functionalities
 
 ### ToDo for now list:
-- fix softmax (because it's not working)
 - dropout layer
 - implement regularizers
 - implement shuffle

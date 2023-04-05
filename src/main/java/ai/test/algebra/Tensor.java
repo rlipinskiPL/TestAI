@@ -119,6 +119,56 @@ public abstract class Tensor implements Cloneable {
         return shape;
     }
 
+    @Override
+    public int hashCode() {
+        int result = 7;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int c = (int) Double.doubleToLongBits(get(i, j));
+                result = result * 37 + c;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Tensor tensor = (Tensor) obj;
+        if (!tensor.shape.equals(this.shape)) {
+            return false;
+        }
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (tensor.get(i, j) != this.get(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean equalsWithPrecision(Object obj, double precision) {
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Tensor tensor = (Tensor) obj;
+        if (!tensor.shape.equals(this.shape)) {
+            return false;
+        }
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                double difference = Math.abs(this.get(i, j) - tensor.get(i, j));
+                if (difference > precision) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static Tensor build(List<List<Double>> values) {
         if (values.isEmpty()) {
             throw new IllegalArgumentException("Empty list is not permitted here");
@@ -171,6 +221,16 @@ public abstract class Tensor implements Cloneable {
             throw new IllegalArgumentException("Empty list is not permitted here");
         }
         return new Vector(values, horizontal);
+    }
+
+    public static Tensor eye(int dimension){
+        double[][] result = new double[dimension][dimension];
+        for(int i=0;i<dimension;i++){
+            for(int j=0;j<dimension;j++){
+                result[i][j] = i==j ? 1 : 0;
+            }
+        }
+        return Tensor.build(result);
     }
 
     public static Tensor readFromCsv(String filePath) {

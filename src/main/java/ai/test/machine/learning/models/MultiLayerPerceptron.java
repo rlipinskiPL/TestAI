@@ -67,7 +67,7 @@ public class MultiLayerPerceptron extends Model {
                 Tensor netOutput = feedForward(X);
 
                 Layer lastLayer = layers.get(layers.size() - 1);
-                Tensor outputError = lossFunction.derivative(netOutput, Y).elementwise(lastLayer.getActivationFunction().derivative(lastLayer.getLastImpulse()));
+                Tensor outputError = computeError(lossFunction.derivative(netOutput, Y),lastLayer.getActivationFunction().derivative(lastLayer.getLastImpulse()));
                 Tensor cost = lossFunction.call(netOutput, Y);
                 if (cost.getClass() == Vector.class) {
                     currentCosts.add(((Vector) cost).stream().mapToDouble(d -> d).average().orElseThrow());
@@ -119,10 +119,31 @@ public class MultiLayerPerceptron extends Model {
         if (layerNumber != 0) {
             Layer previousLayer = layers.get(layerNumber - 1);
             currentLayer.updateParams(previousLayer.getLastActivation(), error, learningRate);
-            Tensor newError = error.dot(currentLayer.getWeights().transpose()).elementwise(previousLayer.getActivationFunction().derivative(previousLayer.getLastImpulse()));
+            Tensor newError = computeError(error.dot(currentLayer.getWeights().transpose()),previousLayer.getActivationFunction().derivative(previousLayer.getLastImpulse()));
             prop(layerNumber - 1, newError);
         } else {
             currentLayer.updateParams(lastInput, error, learningRate);
+        }
+    }
+
+    private Tensor computeError(Tensor first, Tensor second){
+        if(first.getShape().equals(second.getShape())){
+            return first.elementwise(second);
+        } else if (first.height() * first.width() == second.height() && first.width() == second.width()) {
+            if(first.isVector()){
+                return first.dot(second);
+            }
+
+            Matrix firstMatrix = (Matrix) first;
+            Matrix secondMatrix = (Matrix) second;
+            Vector[] resultVectors = new Vector[first.height()];
+
+            for(int i=0;i< first.height();i++){
+                resultVectors[i] = ((Vector) firstMatrix.getRow(i).dot(secondMatrix.cut(i*first.width(),(i+1)*first.width()-1)));
+            }
+            return Tensor.makeMatrix(resultVectors);
+        }else{
+            throw new UnsupportedOperationException("Unsupported method of computing error in MLP");
         }
     }
 }

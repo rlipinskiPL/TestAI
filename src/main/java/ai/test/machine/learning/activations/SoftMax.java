@@ -1,6 +1,8 @@
 package ai.test.machine.learning.activations;
 
+import ai.test.algebra.Matrix;
 import ai.test.algebra.Tensor;
+import ai.test.algebra.Vector;
 
 import java.util.Arrays;
 
@@ -53,12 +55,25 @@ public class SoftMax extends JointValuesActivation {
 
     @Override
     public Tensor derivative(Tensor X) {
-        Tensor resultOfSoftMax = this.call(X);
-        double[][] result = new double[X.height()][X.width()];
-        for (int i = 0; i < X.height(); i++) {
-            for (int j = 0; j < X.width(); j++) {
-                double value = resultOfSoftMax.get(i, j);
-                result[i][j] = value * (1 - value);
+        int width = X.width();
+        double[][] result = new double[width*X.height()][width];
+        for(int rowNr=0;rowNr<X.height();rowNr++){
+            Vector row;
+            if(X.getClass()== Matrix.class){
+                row = ((Matrix)X).getRow(rowNr);
+            }else{
+                row = (Vector) X;
+            }
+
+            Vector softmax = (Vector) callJointly(row);
+            for(int i=0;i<width;i++){
+                for(int j=0;j<width;j++){
+                    if(i == j){
+                        result[rowNr*width+i][j] = softmax.get(i)*(1- softmax.get(i));
+                    }else{
+                        result[rowNr*width+i][j] = -softmax.get(i)* softmax.get(j);
+                    }
+                }
             }
         }
         return Tensor.build(result);
