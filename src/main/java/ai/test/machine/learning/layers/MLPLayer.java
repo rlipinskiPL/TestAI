@@ -9,7 +9,7 @@ import ai.test.machine.learning.activations.JointValuesActivation;
 import ai.test.machine.learning.initializers.Initializer;
 import ai.test.machine.learning.initializers.RandomNormal;
 import ai.test.machine.learning.layers.neurons.Neuron;
-import ai.test.machine.learning.tools.Regularizer;
+import ai.test.machine.learning.regularizers.Regularizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 public class MLPLayer implements Layer {
     private final List<Neuron> neurons = new ArrayList<>();
     private final ActivationFunction activationFunction;
-    private Regularizer regularizer = Regularizer.NON;
+    private Regularizer regularizer = null;
     private Initializer initializer = new RandomNormal();
 
     public MLPLayer(int units, ActivationFunction activationFunction, Regularizer regularizer, Initializer initializer) {
@@ -55,6 +55,9 @@ public class MLPLayer implements Layer {
     @Override
     public void updateParams(Tensor inputs, Tensor error, double learningRate) {
         Tensor updateWeights = inputs.transpose().dot(error).multiply(-learningRate);
+        if(regularizer != null){
+            updateWeights = updateWeights.add(regularizer.computeDerivative(getWeights()));
+        }
         Tensor updateBiases = error.multiply(-learningRate);
         for (int i = 0; i < neurons.size(); i++) {
             Neuron neuron = neurons.get(i);
