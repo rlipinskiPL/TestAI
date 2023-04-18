@@ -49,7 +49,7 @@ public class SoftMax extends JointValuesActivation {
                 result[i][j] = nominators[i][j] / denominators[i];
             }
         }
-
+        
         return Tensor.build(result);
     }
 

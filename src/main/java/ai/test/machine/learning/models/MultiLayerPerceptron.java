@@ -10,6 +10,7 @@ import ai.test.machine.learning.layers.MLPLayer;
 import ai.test.machine.learning.loss.LossFunction;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.DoubleStream;
@@ -53,9 +54,10 @@ public class MultiLayerPerceptron extends Model {
         } else if (batchSize < 0 || epochs < 0) {
             throw new IllegalArgumentException("Epochs and batchSize must be positive number");
         }
+
         for (int i = 0; i < epochs; i++) {
             if (shuffle) {
-                //ToDo shuffle
+                input = shuffle(input);
             }
             int currentRow = 0;
             List<Double> currentCosts = new LinkedList<>();
@@ -145,5 +147,25 @@ public class MultiLayerPerceptron extends Model {
         }else{
             throw new UnsupportedOperationException("Unsupported method of computing error in MLP");
         }
+    }
+
+    private Tensor shuffle(Tensor X){
+        if(X.isVector()){
+            throw new IllegalArgumentException("Cannot shuffle vector");
+        }
+
+        Matrix data = (Matrix)X;
+        Integer[] indices = new Integer[data.height()];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
+        Collections.shuffle(Arrays.asList(indices));
+
+        Vector[] result = new Vector[data.height()];
+        for(int i=0;i< data.height();i++){
+            result[i] = data.getRow(indices[i]);
+        }
+
+        return Tensor.makeMatrix(result);
     }
 }
