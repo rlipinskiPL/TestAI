@@ -15,8 +15,6 @@ Currently available are only MLP's with basic functionalities.
 
 ### ToDo for now list:
 - dropout layer
-- implement regularizers
-- implement shuffle
 - add javadocs to all classes and methods
 - description of equations used in project
 - add unit tests
