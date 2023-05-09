@@ -10,17 +10,28 @@ import ai.test.machine.learning.initializers.Initializer;
 import ai.test.machine.learning.initializers.RandomNormal;
 import ai.test.machine.learning.layers.neurons.Neuron;
 import ai.test.machine.learning.regularizers.Regularizer;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MLPLayer implements Layer {
+
     private final List<Neuron> neurons = new ArrayList<>();
+
     private final ActivationFunction activationFunction;
+
     private Regularizer regularizer = null;
+
     private Initializer initializer = new RandomNormal();
 
-    public MLPLayer(int units, ActivationFunction activationFunction, Regularizer regularizer, Initializer initializer) {
+    @Getter
+    private Shape shape;
+
+    public MLPLayer(int units,
+                    ActivationFunction activationFunction,
+                    Regularizer regularizer,
+                    Initializer initializer) {
         for (int i = 0; i < units; i++) {
             neurons.add(new Neuron(activationFunction));
         }
@@ -29,7 +40,9 @@ public class MLPLayer implements Layer {
         this.initializer = initializer;
     }
 
-    public MLPLayer(int units, ActivationFunction activationFunction, Regularizer regularizer) {
+    public MLPLayer(int units,
+                    ActivationFunction activationFunction,
+                    Regularizer regularizer) {
         for (int i = 0; i < units; i++) {
             neurons.add(new Neuron(activationFunction));
         }
@@ -37,7 +50,9 @@ public class MLPLayer implements Layer {
         this.regularizer = regularizer;
     }
 
-    public MLPLayer(int units, ActivationFunction activationFunction, Initializer initializer) {
+    public MLPLayer(int units,
+                    ActivationFunction activationFunction,
+                    Initializer initializer) {
         for (int i = 0; i < units; i++) {
             neurons.add(new Neuron(activationFunction));
         }
@@ -54,8 +69,10 @@ public class MLPLayer implements Layer {
 
     @Override
     public void updateParams(Tensor inputs, Tensor error, double learningRate) {
-        Tensor updateWeights = inputs.transpose().dot(error).multiply(-learningRate);
-        if(regularizer != null){
+        Tensor updateWeights = inputs.transpose()
+                                        .dot(error)
+                                        .multiply(-learningRate);
+        if (regularizer != null) {
             updateWeights = updateWeights.add(regularizer.computeDerivative(getWeights()));
         }
         Tensor updateBiases = error.multiply(-learningRate);
@@ -122,12 +139,8 @@ public class MLPLayer implements Layer {
         if (inputShape.getDimensions() != 1) {
             throw new IllegalArgumentException("Neurons accept only one-dimensional data");
         }
+        shape = inputShape;
         neurons.forEach(neuron -> neuron.compile(inputShape, initializer));
-    }
-
-    @Override
-    public Shape getShape() {
-        return new Shape(neurons.size());
     }
 
     @Override

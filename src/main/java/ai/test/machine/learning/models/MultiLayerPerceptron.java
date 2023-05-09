@@ -55,12 +55,16 @@ public class MultiLayerPerceptron extends Model {
             throw new IllegalArgumentException("Epochs and batchSize must be positive number");
         }
 
+        Layer lastLayer = layers.get(layers.size() - 1);
+
         for (int i = 0; i < epochs; i++) {
             if (shuffle) {
                 input = shuffle(input);
             }
+
             int currentRow = 0;
             List<Double> currentCosts = new LinkedList<>();
+
             while (currentRow < input.height()) {
                 Tensor X = input.cut(currentRow, currentRow + batchSize - 1);
                 Tensor Y = output.cut(currentRow, currentRow + batchSize - 1);
@@ -68,19 +72,22 @@ public class MultiLayerPerceptron extends Model {
 
                 Tensor netOutput = feedForward(X);
 
-                Layer lastLayer = layers.get(layers.size() - 1);
-                Tensor outputError = computeError(lossFunction.derivative(netOutput, Y),lastLayer.getActivationFunction().derivative(lastLayer.getLastImpulse()));
+                Tensor outputError = computeError(
+                        lossFunction.derivative(netOutput, Y),
+                        lastLayer.getActivationFunction().derivative(lastLayer.getLastImpulse())
+                );
+
                 Tensor cost = lossFunction.call(netOutput, Y);
                 if (cost.getClass() == Vector.class) {
-                    currentCosts.add(((Vector) cost).stream().mapToDouble(d -> d).average().orElseThrow());
+                    currentCosts.add(((Vector) cost).stream().mapToDouble(d -> d).average().orElseThrow(NullPointerException::new));
                 } else {
-                    currentCosts.add(((Matrix) cost).stream().flatMapToDouble(array -> DoubleStream.of(Arrays.stream(array).sum())).average().orElseThrow());
+                    currentCosts.add(((Matrix) cost).stream().flatMapToDouble(array -> DoubleStream.of(Arrays.stream(array).sum())).average().orElseThrow(NullPointerException::new));
                 }
 
                 backProp(outputError);
                 currentRow += batchSize;
             }
-            costs.add(currentCosts.stream().mapToDouble(num -> num).average().orElseThrow());
+            costs.add(currentCosts.stream().mapToDouble(num -> num).average().orElseThrow(NullPointerException::new));
         }
     }
 
@@ -120,19 +127,33 @@ public class MultiLayerPerceptron extends Model {
         Layer currentLayer = layers.get(layerNumber);
         if (layerNumber != 0) {
             Layer previousLayer = layers.get(layerNumber - 1);
-            currentLayer.updateParams(previousLayer.getLastActivation(), error, learningRate);
-            Tensor newError = computeError(error.dot(currentLayer.getWeights().transpose()),previousLayer.getActivationFunction().derivative(previousLayer.getLastImpulse()));
+
+            currentLayer.updateParams(
+                    previousLayer.getLastActivation(),
+                    error,
+                    learningRate
+            );
+
+            Tensor newError = computeError(
+                    error.dot(currentLayer.getWeights().transpose()),
+                    previousLayer.getActivationFunction().derivative(previousLayer.getLastImpulse())
+            );
+
             prop(layerNumber - 1, newError);
         } else {
-            currentLayer.updateParams(lastInput, error, learningRate);
+            currentLayer.updateParams(
+                    lastInput,
+                    error,
+                    learningRate
+            );
         }
     }
 
-    private Tensor computeError(Tensor first, Tensor second){
-        if(first.getShape().equals(second.getShape())){
+    private Tensor computeError(Tensor first, Tensor second) {
+        if (first.getShape().equals(second.getShape())) {
             return first.elementwise(second);
         } else if (first.height() * first.width() == second.height() && first.width() == second.width()) {
-            if(first.isVector()){
+            if (first.isVector()) {
                 return first.dot(second);
             }
 
@@ -140,21 +161,25 @@ public class MultiLayerPerceptron extends Model {
             Matrix secondMatrix = (Matrix) second;
             Vector[] resultVectors = new Vector[first.height()];
 
-            for(int i=0;i< first.height();i++){
-                resultVectors[i] = ((Vector) firstMatrix.getRow(i).dot(secondMatrix.cut(i*first.width(),(i+1)*first.width()-1)));
+            for (int i = 0; i < first.height(); i++) {
+                resultVectors[i] = ((Vector) firstMatrix.getRow(i)
+                                                            .dot(secondMatrix.cut(
+                                                                    i * first.width(),
+                                                                    (i + 1) * first.width() - 1)
+                                                            ));
             }
             return Tensor.makeMatrix(resultVectors);
-        }else{
+        } else {
             throw new UnsupportedOperationException("Unsupported method of computing error in MLP");
         }
     }
 
-    private Tensor shuffle(Tensor X){
-        if(X.isVector()){
-            throw new IllegalArgumentException("Cannot shuffle vector");
+    private Tensor shuffle(Tensor X) {
+        if (X.isVector()) {
+            return X;
         }
 
-        Matrix data = (Matrix)X;
+        Matrix data = (Matrix) X;
         Integer[] indices = new Integer[data.height()];
         for (int i = 0; i < indices.length; i++) {
             indices[i] = i;
@@ -162,7 +187,7 @@ public class MultiLayerPerceptron extends Model {
         Collections.shuffle(Arrays.asList(indices));
 
         Vector[] result = new Vector[data.height()];
-        for(int i=0;i< data.height();i++){
+        for (int i = 0; i < data.height(); i++) {
             result[i] = data.getRow(indices[i]);
         }
 

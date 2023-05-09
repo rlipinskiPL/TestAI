@@ -1,19 +1,27 @@
 package ai.test.algebra;
 
+import lombok.Getter;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
-//ToDo protection against wrong sizes
-//ToDo and in subclasses protection against going outside the array
+//ToDo in subclasses protection against going outside the array
 public abstract class Tensor implements Cloneable {
+
     protected int width;
+
     protected int height;
+
+    @Getter
     protected Shape shape;
 
     protected Tensor(int height, int width) {
+        if(height<0 || width < 0){
+            throw new IllegalArgumentException("Dimensions of the tensor cannot be negative numbers");
+        }
         this.width = width;
         this.height = height;
         this.shape = new Shape(height, width);
@@ -115,10 +123,6 @@ public abstract class Tensor implements Cloneable {
         return width;
     }
 
-    public Shape getShape() {
-        return shape;
-    }
-
     @Override
     public int hashCode() {
         int result = 7;
@@ -181,8 +185,8 @@ public abstract class Tensor implements Cloneable {
                 return new Vector(values.get(0), true);
             } else {
                 List<Double> tmp = new ArrayList<>();
-                for (int i = 0; i < values.size(); i++) {
-                    tmp.add(values.get(i).get(0));
+                for (List<Double> value : values) {
+                    tmp.add(value.get(0));
                 }
                 return new Vector(tmp, false);
             }
@@ -223,11 +227,16 @@ public abstract class Tensor implements Cloneable {
         return new Vector(values, horizontal);
     }
 
-    public static Tensor eye(int dimension){
+    public static Tensor build(boolean isHorizontal, double... values) {
+        return Tensor.build(values, isHorizontal);
+    }
+
+
+    public static Tensor eye(int dimension) {
         double[][] result = new double[dimension][dimension];
-        for(int i=0;i<dimension;i++){
-            for(int j=0;j<dimension;j++){
-                result[i][j] = i==j ? 1 : 0;
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                result[i][j] = i == j ? 1 : 0;
             }
         }
         return Tensor.build(result);
@@ -264,10 +273,6 @@ public abstract class Tensor implements Cloneable {
             }
         }
         return Tensor.build(values);
-    }
-
-    public static Tensor build(boolean isHorizontal, double... values) {
-        return Tensor.build(values, isHorizontal);
     }
 
     public static Tensor makeMatrix(Vector... vectors) {

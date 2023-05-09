@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Standardization {
+
     private List<Double> mu;
+
     private List<Double> sigma;
 
     public void fit(Matrix X) {

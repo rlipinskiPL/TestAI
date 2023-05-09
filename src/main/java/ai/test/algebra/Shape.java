@@ -1,9 +1,16 @@
 package ai.test.algebra;
 
+import lombok.Getter;
+
+@Getter
 public class Shape {
+
     private final int x;
+
     private final int y;
+
     private final int z;
+
     private final int dimensions;
 
     public Shape(int x) {
@@ -25,22 +32,6 @@ public class Shape {
         this.y = y;
         this.z = z;
         this.dimensions = 3;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getZ() {
-        return z;
-    }
-
-    public int getDimensions() {
-        return dimensions;
     }
 
     @Override

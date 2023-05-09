@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class Matrix extends Tensor {
+
     private double[][] data;
 
     public Matrix(List<List<Double>> values) {
@@ -46,7 +47,6 @@ public class Matrix extends Tensor {
 
     @Override
     public Tensor transpose() {
-        //ToDo find better algorithm or optimize it by java functionalities
         double[][] result = new double[width][height];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -92,10 +92,8 @@ public class Matrix extends Tensor {
         }
 
         double[][] result = end < this.height ? new double[end - start + 1][data[0].length] : new double[this.height - start + 1][data[0].length];
-        for (int i = start, k = 0; i <= end; i++, k++) {
-            if (i == data.length)
-                break;
 
+        for (int i = start, k = 0; i <= end && i < data.length; i++, k++) {
             result[k] = data[i];
         }
         return Tensor.build(result);
@@ -133,15 +131,13 @@ public class Matrix extends Tensor {
     public Vector dropRow(int n) {
         double[][] result = new double[height - 1][width];
         Tensor toReturn = null;
-        for (int i = 0, k = 0; i < data.length; i++) {
+        for (int i = 0, k = 0; i < data.length; i++, k++) {
             if (i != n) {
                 result[k] = data[i];
             } else {
                 k--;
                 toReturn = Tensor.build(data[i].clone(), true);
             }
-            i++;
-            k++;
         }
         data = result;
         height--;

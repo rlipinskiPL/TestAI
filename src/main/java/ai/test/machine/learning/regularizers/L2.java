@@ -2,7 +2,8 @@ package ai.test.machine.learning.regularizers;
 
 import ai.test.algebra.Tensor;
 
-public class L2 implements Regularizer{
+public class L2 implements Regularizer {
+
     private final double alpha;
 
     public L2(double alpha) {
@@ -13,9 +14,9 @@ public class L2 implements Regularizer{
     public Tensor computeDerivative(Tensor weights) {
         double[][] result = new double[weights.height()][weights.width()];
 
-        for(int i=0;i< weights.height();i++){
-            for(int j=0;j< weights.width();j++){
-                result[i][j]=alpha* weights.get(i,j);
+        for (int i = 0; i < weights.height(); i++) {
+            for (int j = 0; j < weights.width(); j++) {
+                result[i][j] = alpha * weights.get(i, j);
             }
         }
         return Tensor.build(result);

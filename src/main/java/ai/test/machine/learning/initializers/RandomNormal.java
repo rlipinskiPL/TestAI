@@ -5,6 +5,7 @@ import ai.test.algebra.Tensor;
 import java.util.Random;
 
 public class RandomNormal implements Initializer {
+
     private final Random rand;
 
     public RandomNormal() {
@@ -20,7 +21,7 @@ public class RandomNormal implements Initializer {
     public double compute(Tensor tensor) {
         for (int i = 0; i < tensor.height(); i++) {
             for (int j = 0; j < tensor.width(); j++) {
-                tensor.set(i, j, rand.nextGaussian(0, 0.1));
+                tensor.set(i, j, rand.nextGaussian());
             }
         }
         return rand.nextGaussian();

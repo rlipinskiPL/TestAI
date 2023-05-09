@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class Vector extends Tensor {
+
     private final double[] data;
+
     private final boolean isHorizontal;
 
     public Vector(List<Double> values, boolean horizontal) {

@@ -3,16 +3,23 @@ package ai.test.machine.learning.models;
 import ai.test.algebra.Shape;
 import ai.test.machine.learning.layers.Layer;
 import ai.test.machine.learning.loss.LossFunction;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Model {
+
     protected List<Layer> layers = new ArrayList<>();
+
+    @Getter
     protected List<Double> costs = new LinkedList<>();
+
     protected LossFunction lossFunction;
+
     protected double learningRate;
+
     protected boolean isCompiled = false;
 
     protected Model(LossFunction lossFunction, double learningRate) {
@@ -31,8 +38,4 @@ public abstract class Model {
     }
 
     public abstract Object predict(Object x);
-
-    public List<Double> getCosts() {
-        return costs;
-    }
 }

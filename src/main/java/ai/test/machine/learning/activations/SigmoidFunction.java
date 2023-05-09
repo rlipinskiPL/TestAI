@@ -1,6 +1,7 @@
 package ai.test.machine.learning.activations;
 
 public class SigmoidFunction implements ActivationFunction {
+
     @Override
     public double call(double x) {
         return 1 / (1 + Math.exp(-x));

@@ -5,6 +5,7 @@ import ai.test.algebra.Tensor;
 import ai.test.machine.learning.activations.ActivationFunction;
 
 public interface Layer {
+
     void updateParams(Tensor inputs, Tensor error, double learningRate);
 
     void compile(Shape inputShape);

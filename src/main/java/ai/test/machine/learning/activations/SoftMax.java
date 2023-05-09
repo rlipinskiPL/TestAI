@@ -6,7 +6,6 @@ import ai.test.algebra.Vector;
 
 import java.util.Arrays;
 
-//ToDo this implementation is wrong, need to fix it
 public class SoftMax extends JointValuesActivation {
 
     @Override
@@ -56,22 +55,22 @@ public class SoftMax extends JointValuesActivation {
     @Override
     public Tensor derivative(Tensor X) {
         int width = X.width();
-        double[][] result = new double[width*X.height()][width];
-        for(int rowNr=0;rowNr<X.height();rowNr++){
+        double[][] result = new double[width * X.height()][width];
+        for (int rowNr = 0; rowNr < X.height(); rowNr++) {
             Vector row;
-            if(X.getClass()== Matrix.class){
-                row = ((Matrix)X).getRow(rowNr);
-            }else{
+            if (X.getClass() == Matrix.class) {
+                row = ((Matrix) X).getRow(rowNr);
+            } else {
                 row = (Vector) X;
             }
 
             Vector softmax = (Vector) callJointly(row);
-            for(int i=0;i<width;i++){
-                for(int j=0;j<width;j++){
-                    if(i == j){
-                        result[rowNr*width+i][j] = softmax.get(i)*(1- softmax.get(i));
-                    }else{
-                        result[rowNr*width+i][j] = -softmax.get(i)* softmax.get(j);
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < width; j++) {
+                    if (i == j) {
+                        result[rowNr * width + i][j] = softmax.get(i) * (1 - softmax.get(i));
+                    } else {
+                        result[rowNr * width + i][j] = -softmax.get(i) * softmax.get(j);
                     }
                 }
             }

@@ -2,8 +2,10 @@ package ai.test.machine.learning.regularizers;
 
 import ai.test.algebra.Tensor;
 
-public class ElasticNet implements Regularizer{
+public class ElasticNet implements Regularizer {
+
     private final L1 l1;
+
     private final L2 l2;
 
     public ElasticNet(double l1, double l2) {
