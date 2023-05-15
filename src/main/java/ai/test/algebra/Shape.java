@@ -1,16 +1,33 @@
 package ai.test.algebra;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+/**
+ * This class represents shape of some object, so it brings information about dimensions and size in each dimension
+ */
 @Getter
+@EqualsAndHashCode
 public class Shape {
 
+    /**
+     * @return size of first dimension
+     */
     private final int x;
 
+    /**
+     * @return size of second dimension
+     */
     private final int y;
 
+    /**
+     * @return size of third dimension
+     */
     private final int z;
 
+    /**
+     * @return number of dimension
+     */
     private final int dimensions;
 
     public Shape(int x) {
@@ -32,20 +49,5 @@ public class Shape {
         this.y = y;
         this.z = z;
         this.dimensions = 3;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 * x + 191 * y + 401 * z;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj.getClass() != Shape.class) {
-            return false;
-        } else {
-            Shape shapeObj = (Shape) obj;
-            return this.x == shapeObj.x && this.y == shapeObj.y && this.z == shapeObj.z;
-        }
     }
 }

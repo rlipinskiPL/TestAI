@@ -15,6 +15,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.DoubleStream;
 
+/**
+ * This class implements multi layer perceptron model that accepts only MLPLayer and DropOutLayer as layers.
+ * It is model that is based on neurons grouped in layers, all neurons in adjacent layers are connected to each other.
+ * Only acceptable input for this model is two-dimensional tensors, but single data object is one-dimensional vector.
+ */
 public class MultiLayerPerceptron extends Model {
 
     private Tensor lastInput;
@@ -48,6 +53,17 @@ public class MultiLayerPerceptron extends Model {
         fit((Tensor) input, (Tensor) output, batchSize, epochs, shuffle);
     }
 
+    /**
+     * This method trains the model based on the provided data.
+     * It performs feed forward and back propagation to train model.
+     *
+     * @param input     training data
+     * @param output    training labels
+     * @param batchSize size of batch transferred to single training iteration
+     * @param epochs    number of epochs
+     * @param shuffle   if model should shuffle training data after each epoch
+     * @see <a href="/equations.pdf>4 and 5 section in equations.pdf file</a>
+     */
     public void fit(Tensor input, Tensor output, int batchSize, int epochs, boolean shuffle) {
         if (!isCompiled) {
             throw new IllegalStateException("Model is not compiled! Compile model before using it");
@@ -59,7 +75,7 @@ public class MultiLayerPerceptron extends Model {
 
         for (int i = 0; i < epochs; i++) {
             if (shuffle) {
-                input = shuffle(input);
+                input = shuffle(input); //ToDo its wrong, so should fix it
             }
 
             int currentRow = 0;
@@ -72,7 +88,7 @@ public class MultiLayerPerceptron extends Model {
 
                 Tensor netOutput = feedForward(X);
 
-                Tensor outputError = computeError(
+                Tensor outputError = computeError(  //EQUATION 5.1 (equations.pdf)
                         lossFunction.derivative(netOutput, Y),
                         lastLayer.getActivationFunction().derivative(lastLayer.getLastImpulse())
                 );
@@ -87,7 +103,9 @@ public class MultiLayerPerceptron extends Model {
                 backProp(outputError);
                 currentRow += batchSize;
             }
-            costs.add(currentCosts.stream().mapToDouble(num -> num).average().orElseThrow(NullPointerException::new));
+            Double meanCost = currentCosts.stream().mapToDouble(num -> num).average().orElseThrow(NullPointerException::new);
+            costs.add(meanCost);
+            System.out.println("Epoch " + (i + 1) + " loss: " + meanCost);
         }
     }
 
@@ -99,6 +117,12 @@ public class MultiLayerPerceptron extends Model {
         return predict((Vector) X);
     }
 
+    /**
+     * Predicts value basing on given data.
+     *
+     * @param X input data
+     * @return predicted value
+     */
     public Vector predict(Vector X) {
         if (!isCompiled) {
             throw new IllegalStateException("Model is not compiled! Compile model before using it");
@@ -106,12 +130,25 @@ public class MultiLayerPerceptron extends Model {
         return (Vector) feedForward(X);
     }
 
+    /**
+     * This method perform feed forward recursively.
+     *
+     * @param input input data
+     * @return predicted value
+     */
     private Tensor feedForward(Tensor input) {
         return feed(0, input);
     }
 
+    /**
+     * Recursive method propagating layers output forward.
+     *
+     * @param layerNumber number of layer to compute output
+     * @param X           input data
+     * @return output of given layer
+     */
     private Tensor feed(int layerNumber, Tensor X) {
-        Tensor activation = layers.get(layerNumber).getActivation(X);
+        Tensor activation = layers.get(layerNumber).computeOutput(X); //EQUATION 4.1 or 4.2 (equations.pdf)
         if (layerNumber == layers.size() - 1) {
             return activation;
         } else {
@@ -119,42 +156,72 @@ public class MultiLayerPerceptron extends Model {
         }
     }
 
+    /**
+     * This method perform back propagation recursively.
+     *
+     * @param error last layer error
+     */
     private void backProp(Tensor error) {
         prop(layers.size() - 1, error);
     }
 
+    /**
+     * Recursive method propagating error through all layers.
+     *
+     * @param layerNumber number of layer to update weights and compute new error
+     * @param error       error for current layer
+     */
     private void prop(int layerNumber, Tensor error) {
         Layer currentLayer = layers.get(layerNumber);
         if (layerNumber != 0) {
             Layer previousLayer = layers.get(layerNumber - 1);
 
+            Tensor weightsDelta = previousLayer.getLastActivation().transpose()  //EQUATION 5.3 (equations.pdf)
+                    .matmul(error)
+                    .multiply(learningRate);
+            Tensor biasDelta = error.multiply(learningRate);  //EQUATION 5.4 (equations.pdf)
+
             currentLayer.updateParams(
-                    previousLayer.getLastActivation(),
-                    error,
-                    learningRate
+                    weightsDelta,
+                    biasDelta
             );
 
-            Tensor newError = computeError(
-                    error.dot(currentLayer.getWeights().transpose()),
+            Tensor newError = computeError(  //EQUATION 5.2 (equations.pdf)
+                    error.matmul(currentLayer.getWeights().transpose()),
                     previousLayer.getActivationFunction().derivative(previousLayer.getLastImpulse())
             );
 
             prop(layerNumber - 1, newError);
         } else {
+            Tensor weightsDelta = lastInput.transpose()
+                    .matmul(error)
+                    .multiply(learningRate);
+            Tensor biasDelta = error.multiply(learningRate);
+
             currentLayer.updateParams(
-                    lastInput,
-                    error,
-                    learningRate
+                    weightsDelta,
+                    biasDelta
             );
         }
     }
 
+    /**
+     * This method computes error basing on two factors given as parameters.
+     * First case is when two factors have the same shape, then result is hadamard product of them.
+     * Second case is when two factors have the same width but second factor height is a product of height and width of first factor.
+     * It means that second factor represents not vector of derivatives but jacobians combined into one matrix.
+     *
+     * @param first  first factor for computing error
+     * @param second second factor for computing error
+     * @return error
+     * @see <a href="/equations.pdf>equation 5.2</a>
+     */
     private Tensor computeError(Tensor first, Tensor second) {
         if (first.getShape().equals(second.getShape())) {
             return first.elementwise(second);
         } else if (first.height() * first.width() == second.height() && first.width() == second.width()) {
             if (first.isVector()) {
-                return first.dot(second);
+                return first.matmul(second);
             }
 
             Matrix firstMatrix = (Matrix) first;
@@ -163,10 +230,10 @@ public class MultiLayerPerceptron extends Model {
 
             for (int i = 0; i < first.height(); i++) {
                 resultVectors[i] = ((Vector) firstMatrix.getRow(i)
-                                                            .dot(secondMatrix.cut(
-                                                                    i * first.width(),
-                                                                    (i + 1) * first.width() - 1)
-                                                            ));
+                        .matmul(secondMatrix.cut(
+                                i * first.width(),
+                                (i + 1) * first.width() - 1)
+                        ));
             }
             return Tensor.makeMatrix(resultVectors);
         } else {
@@ -174,10 +241,13 @@ public class MultiLayerPerceptron extends Model {
         }
     }
 
+    /**
+     * NOT WORKING
+     *
+     * @param X input
+     * @return shuffled input
+     */
     private Tensor shuffle(Tensor X) {
-        if (X.isVector()) {
-            return X;
-        }
 
         Matrix data = (Matrix) X;
         Integer[] indices = new Integer[data.height()];

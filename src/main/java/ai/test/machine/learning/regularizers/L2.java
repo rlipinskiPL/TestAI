@@ -2,6 +2,9 @@ package ai.test.machine.learning.regularizers;
 
 import ai.test.algebra.Tensor;
 
+/**
+ * This class implements Regularizer interface by using L2 algorithm.
+ */
 public class L2 implements Regularizer {
 
     private final double alpha;

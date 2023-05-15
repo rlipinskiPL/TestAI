@@ -5,7 +5,6 @@ import ai.test.algebra.Shape;
 import ai.test.algebra.Tensor;
 import ai.test.algebra.Vector;
 import ai.test.machine.learning.activations.ActivationFunction;
-import ai.test.machine.learning.activations.JointValuesActivation;
 import ai.test.machine.learning.initializers.Initializer;
 import ai.test.machine.learning.initializers.RandomNormal;
 import ai.test.machine.learning.layers.neurons.Neuron;
@@ -15,6 +14,9 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Layer interface implementation according to multi layer perceptron where all computing units are connected to each other.
+ */
 public class MLPLayer implements Layer {
 
     private final List<Neuron> neurons = new ArrayList<>();
@@ -26,28 +28,34 @@ public class MLPLayer implements Layer {
     private Initializer initializer = new RandomNormal();
 
     @Getter
-    private Shape shape;
+    private final Shape shape;
 
-    public MLPLayer(int units,
-                    ActivationFunction activationFunction,
-                    Regularizer regularizer,
-                    Initializer initializer) {
+    public MLPLayer(
+            int units,
+            ActivationFunction activationFunction,
+            Regularizer regularizer,
+            Initializer initializer
+    ) {
         for (int i = 0; i < units; i++) {
             neurons.add(new Neuron(activationFunction));
         }
         this.activationFunction = activationFunction;
         this.regularizer = regularizer;
         this.initializer = initializer;
+        this.shape = new Shape(units);
     }
 
-    public MLPLayer(int units,
-                    ActivationFunction activationFunction,
-                    Regularizer regularizer) {
+    public MLPLayer(
+            int units,
+            ActivationFunction activationFunction,
+            Regularizer regularizer
+    ) {
         for (int i = 0; i < units; i++) {
             neurons.add(new Neuron(activationFunction));
         }
         this.activationFunction = activationFunction;
         this.regularizer = regularizer;
+        this.shape = new Shape(units);
     }
 
     public MLPLayer(int units,
@@ -58,6 +66,7 @@ public class MLPLayer implements Layer {
         }
         this.activationFunction = activationFunction;
         this.initializer = initializer;
+        this.shape = new Shape(units);
     }
 
     public MLPLayer(int units, ActivationFunction activationFunction) {
@@ -65,18 +74,24 @@ public class MLPLayer implements Layer {
             neurons.add(new Neuron(activationFunction));
         }
         this.activationFunction = activationFunction;
+        this.shape = new Shape(units);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param updateWeights tensor of update weights vectors
+     * @param biasesDelta   tensor of update bias scalars
+     * @implNote This implementation supports regularizer, so the final result of method could be different from
+     * standard updating hiperparameters algorithm
+     */
     @Override
-    public void updateParams(Tensor inputs, Tensor error, double learningRate) {
-        Tensor updateWeights = inputs.transpose()
-                                        .dot(error)
-                                        .multiply(-learningRate);
+    public void updateParams(Tensor updateWeights, Tensor biasesDelta) {
         if (regularizer != null) {
-            updateWeights = updateWeights.add(regularizer.computeDerivative(getWeights()));
+            updateWeights = updateWeights.add(regularizer.computeDerivative(getWeights())); //applying regularizer value
         }
-        Tensor updateBiases = error.multiply(-learningRate);
-        for (int i = 0; i < neurons.size(); i++) {
+
+        for (int i = 0; i < neurons.size(); i++) { //passing the appropriate update vector to appropriate neuron
             Neuron neuron = neurons.get(i);
             if (updateWeights.isVector()) {
                 neuron.updateWeights((Vector) updateWeights);
@@ -84,25 +99,29 @@ public class MLPLayer implements Layer {
                 neuron.updateWeights(((Matrix) updateWeights).getColumn(i));
             }
 
-            if (error.isVector()) {
-                neuron.updateBias(((Vector) updateBiases).get(i));
+            if (biasesDelta.isVector()) {
+                neuron.updateBias(((Vector) biasesDelta).get(i));
             } else {
-                neuron.updateBias(((Matrix) updateBiases).getColumn(i).stream().mapToDouble(d -> d).sum());
+                neuron.updateBias(((Matrix) biasesDelta).getColumn(i).stream().mapToDouble(d -> d).sum());
             }
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param input input data
+     * @return
+     * @implNote This implementation collect all neurons activations that are computed according to equation number 3.2 in equations.pdf file.
+     * @see <a href="equations.pdf">3.2 equation</a>
+     */
     @Override
-    public Tensor getActivation(Tensor input) {
+    public Tensor computeOutput(Tensor input) {
         Vector[] activations = new Vector[neurons.size()];
         for (int i = 0; i < neurons.size(); i++) {
-            activations[i] = neurons.get(i).computeOutput(input);
+            activations[i] = neurons.get(i).computeOutput(input); //combining neurons outputs into one tensor
         }
-
         Tensor toReturn = Tensor.makeMatrix(activations);
-        if (activationFunction instanceof JointValuesActivation) {
-            toReturn = ((JointValuesActivation) activationFunction).callJointly(toReturn);
-        }
 
         return toReturn;
     }
@@ -134,12 +153,17 @@ public class MLPLayer implements Layer {
         return Tensor.makeMatrix(weights);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param inputShape shape of the input data that will be delivered to the layer
+     * @throws IllegalArgumentException when input shape is not one-dimensional
+     */
     @Override
     public void compile(Shape inputShape) {
         if (inputShape.getDimensions() != 1) {
             throw new IllegalArgumentException("Neurons accept only one-dimensional data");
         }
-        shape = inputShape;
         neurons.forEach(neuron -> neuron.compile(inputShape, initializer));
     }
 

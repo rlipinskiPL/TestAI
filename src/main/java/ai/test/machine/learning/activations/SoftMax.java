@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class SoftMax extends JointValuesActivation {
 
     @Override
-    public Tensor callJointly(Tensor X) {
+    public Tensor call(Tensor X) {
         X = (Tensor) X.clone();
         double[] max = new double[X.height()];
         for (int i = 0; i < max.length; i++) {
@@ -64,7 +64,7 @@ public class SoftMax extends JointValuesActivation {
                 row = (Vector) X;
             }
 
-            Vector softmax = (Vector) callJointly(row);
+            Vector softmax = (Vector) call(row);
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < width; j++) {
                     if (i == j) {

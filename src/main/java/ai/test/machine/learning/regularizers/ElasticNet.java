@@ -2,6 +2,10 @@ package ai.test.machine.learning.regularizers;
 
 import ai.test.algebra.Tensor;
 
+/**
+ * This class implements Regularizer interface by using elastic net algorithm.
+ * In short, it is a combination of the L1 and L2 algorithm.
+ */
 public class ElasticNet implements Regularizer {
 
     private final L1 l1;

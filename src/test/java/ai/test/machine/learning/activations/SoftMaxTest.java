@@ -14,7 +14,7 @@ public class SoftMaxTest {
     public void testCallWithVector_NormalValues1(){
         Tensor input = Tensor.build(List.of(1.,2.,3.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0.09003057, 0.24472847, 0.66524096),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -24,7 +24,7 @@ public class SoftMaxTest {
     public void testCallWithVector_NormalValues2(){
         Tensor input = Tensor.build(List.of(.5,.5,.5),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0.33333333, 0.33333333, 0.33333333),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -34,7 +34,7 @@ public class SoftMaxTest {
     public void testCallWithVector_PositiveAndNegativeValues(){
         Tensor input = Tensor.build(List.of(-1., 0., 1.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0.09003057, 0.24472847, 0.66524095),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -44,7 +44,7 @@ public class SoftMaxTest {
     public void testCallWithVector_BigNegativeValues(){
         Tensor input = Tensor.build(List.of(-100., -200., -300.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(1.,0.,0.),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -54,7 +54,7 @@ public class SoftMaxTest {
     public void testCallWithVector_BigValues1(){ //checking numerical stability
         Tensor input = Tensor.build(List.of(100., 200., 300.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0., 0., 1.),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -64,7 +64,7 @@ public class SoftMaxTest {
     public void testCallWithVector_BigValues2(){ //checking numerical stability
         Tensor input = Tensor.build(List.of(10000., 20000., 30000.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0., 0., 1.),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -74,7 +74,7 @@ public class SoftMaxTest {
     public void testCallWithVector_BigValues3(){ //checking numerical stability
         Tensor input = Tensor.build(List.of(100000., 200000., 300000.),true);
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(0., 0., 1.),true);
         Assert.assertTrue(output.equalsWithPrecision(result,0.0000001));
@@ -92,7 +92,7 @@ public class SoftMaxTest {
                 List.of(100000., 200000., 300000.)
         ));
 
-        Tensor output = softmax.callJointly(input);
+        Tensor output = softmax.call(input);
 
         Tensor result = Tensor.build(List.of(
                 List.of(0.09003057, 0.24472847, 0.66524096),

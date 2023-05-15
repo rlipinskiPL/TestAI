@@ -4,6 +4,10 @@ import ai.test.algebra.Tensor;
 
 import java.util.Random;
 
+/**
+ * This class initialize all hiperparameters randomly in accordance to
+ * normal distribution with mean equals to 0 and standard deviation equals to 0.05.
+ */
 public class RandomNormal implements Initializer {
 
     private final Random rand;
@@ -16,12 +20,11 @@ public class RandomNormal implements Initializer {
         rand = new Random(seed);
     }
 
-    //initialize values in tensor and return next random number(needed to init bias)
     @Override
-    public double compute(Tensor tensor) {
+    public double call(Tensor tensor) {
         for (int i = 0; i < tensor.height(); i++) {
             for (int j = 0; j < tensor.width(); j++) {
-                tensor.set(i, j, rand.nextGaussian());
+                tensor.set(i, j, rand.nextGaussian() * 0.05);
             }
         }
         return rand.nextGaussian();

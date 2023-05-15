@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * This class is implementation of tensor class and represents vectors.
+ */
 public class Vector extends Tensor {
 
     private final double[] data;
@@ -60,10 +63,22 @@ public class Vector extends Tensor {
         }
     }
 
+    /**
+     * This method return specific element from vector regardless of whether vector is horizontal or vertical
+     *
+     * @param i number of elemet
+     * @return i'th element of vector
+     */
     public double get(int i) {
         return data[i];
     }
 
+    /**
+     * This method set specific element from vector regardless of whether vector is horizontal or vertical
+     *
+     * @param i     number of elemet
+     * @param value new value for element
+     */
     public void set(int i, double value) {
         data[i] = value;
     }
@@ -131,6 +146,9 @@ public class Vector extends Tensor {
         return Arrays.stream(data).boxed();
     }
 
+    /**
+     * @return if vector is horizontal
+     */
     public boolean isHorizontal() {
         return isHorizontal;
     }

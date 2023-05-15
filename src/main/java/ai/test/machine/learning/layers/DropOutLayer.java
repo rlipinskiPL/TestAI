@@ -13,11 +13,12 @@ public class DropOutLayer implements Layer {
     }
 
     @Override
-    public void updateParams(Tensor inputs, Tensor error, double learningRate) {
+    public void updateParams(Tensor weightsDelta, Tensor biasesDelta) {
+
     }
 
     @Override
-    public Tensor getActivation(Tensor input) {
+    public Tensor computeOutput(Tensor input) {
         return null;
     }
 

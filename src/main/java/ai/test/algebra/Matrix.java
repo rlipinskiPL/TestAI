@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * This class is implementation of tensor class and represents matrices.
+ */
 public class Matrix extends Tensor {
 
     private double[][] data;
@@ -124,10 +127,22 @@ public class Matrix extends Tensor {
         return Arrays.stream(data);
     }
 
+    /**
+     * This method returns specific row from matrix
+     *
+     * @param n number of row
+     * @return n'th row of matrix
+     */
     public Vector getRow(int n) {
         return (Vector) Tensor.build(data[n].clone(), true);
     }
 
+    /**
+     * This method returns specific row from matrix but additionally remove this row from this object
+     *
+     * @param n number of row
+     * @return n'th row of matrix
+     */
     public Vector dropRow(int n) {
         double[][] result = new double[height - 1][width];
         Tensor toReturn = null;
@@ -144,6 +159,12 @@ public class Matrix extends Tensor {
         return (Vector) toReturn;
     }
 
+    /**
+     * This method returns specific column from matrix
+     *
+     * @param n number of column
+     * @return n'th column of matrix
+     */
     public Vector getColumn(int n) {
         double[] result = new double[height];
         for (int i = 0; i < height; i++) {
@@ -152,20 +173,24 @@ public class Matrix extends Tensor {
         return (Vector) Tensor.build(result, false);
     }
 
+    /**
+     * This method returns specific column from matrix but additionally remove this column from this object
+     *
+     * @param n number of column
+     * @return n'th column of matrix
+     */
     public Vector dropColumn(int n) {
         double[] toReturn = new double[height];
         double[][] result = new double[height][width - 1];
 
         for (int i = 0; i < height; i++) {
-            for (int j = 0, k = 0; j < width; j++) {
+            for (int j = 0, k = 0; j < width; j++, k++) {
                 if (j != n) {
                     result[i][k] = data[i][j];
                 } else {
                     k--;
                     toReturn[i] = data[i][j];
                 }
-                j++;
-                k++;
             }
         }
         data = result;
