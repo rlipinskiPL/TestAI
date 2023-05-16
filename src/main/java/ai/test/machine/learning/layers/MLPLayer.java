@@ -113,7 +113,7 @@ public class MLPLayer implements Layer {
      * @param input input data
      * @return
      * @implNote This implementation collect all neurons activations that are computed according to equation number 3.2 in equations.pdf file.
-     * @see <a href="equations.pdf">3.2 equation</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">3.2 equation</a>
      */
     @Override
     public Tensor computeOutput(Tensor input) {

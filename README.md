@@ -15,7 +15,6 @@ Currently available are only MLP's with basic functionalities.
 
 ### ToDo for now list:
 - dropout layer
-- add javadocs to all classes and methods
-- description of equations used in project
+- finish javadocs
 - add unit tests
 - add integration tests

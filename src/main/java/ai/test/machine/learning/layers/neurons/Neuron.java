@@ -59,7 +59,7 @@ public class Neuron {
      * @param X input tensor
      * @return activation of neuron
      * @throws IllegalArgumentException when number of inputs doesn't match number of weights
-     * @see <a href="equations.pdf">equation 3.2</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">equation 3.2</a>
      */
     public Vector computeOutput(Tensor X) {
         if (weights.height() != X.width()) {
@@ -77,7 +77,7 @@ public class Neuron {
      * Update weights according to equation number 3.3 in equations.pdf file.
      *
      * @param X update weights vector
-     * @see <a href="equations.pdf">equation 3.3</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">equation 3.3</a>
      */
     public void updateWeights(Vector X) {
         if (weights.width() != X.height() && weights.width() != X.width()) {
@@ -91,7 +91,7 @@ public class Neuron {
      * Update bias according to equation number 3.4 in equations.pdf file.
      *
      * @param x update bias scalar
-     * @see <a href="equations.pdf">equation 3.4</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">equation 3.4</a>
      */
     public void updateBias(double x) {
         bias -= x; //EQUATION 3.4 (equations.pdf)

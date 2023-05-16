@@ -62,7 +62,7 @@ public class MultiLayerPerceptron extends Model {
      * @param batchSize size of batch transferred to single training iteration
      * @param epochs    number of epochs
      * @param shuffle   if model should shuffle training data after each epoch
-     * @see <a href="/equations.pdf>4 and 5 section in equations.pdf file</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">4 and 5 section in equations.pdf file</a>
      */
     public void fit(Tensor input, Tensor output, int batchSize, int epochs, boolean shuffle) {
         if (!isCompiled) {
@@ -214,7 +214,7 @@ public class MultiLayerPerceptron extends Model {
      * @param first  first factor for computing error
      * @param second second factor for computing error
      * @return error
-     * @see <a href="/equations.pdf>equation 5.2</a>
+     * @see <a href="https://github.com/rlipinskiPL/TestAI/blob/master/equations.pdf">equation 5.2</a>
      */
     private Tensor computeError(Tensor first, Tensor second) {
         if (first.getShape().equals(second.getShape())) {
